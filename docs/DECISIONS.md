@@ -5,7 +5,7 @@ Append-only. Never edit or delete an entry. To reverse one, add a new ADR and ma
 ---
 
 ## ADR-001 — Name: Beckon
-**Status:** accepted · 2026-09-09
+**Status:** SUPERSEDED BY ADR-020 · 2026-09-09
 
 "Beckon" means to summon someone with a gesture — literally what the product does, and it covers the voice layer too (you can beckon by calling out). Short, pronounceable, memorable, and subtle rather than sci-fi corny.
 
@@ -167,6 +167,19 @@ Revisit at Azure Trusted Signing (~$10/month) only if download volume justifies 
 No analytics, no crash reporting, no network calls except user-initiated model download and an opt-in update check. The camera device is opened when armed and released when disarmed, so the hardware indicator light is an honest signal of state.
 
 **Why:** the product asks for permanent webcam and microphone access. Trust is the entire premise; a single telemetry ping would undermine the pitch and the privacy claim in the README.
+
+---
+
+## ADR-020 — Name: Elara (supersedes ADR-001)
+**Status:** accepted · 2026-09-09
+
+The app is a personified assistant you speak to, so it wanted a name that sounds like a person rather than a verb. **Elara** — a moon of Jupiter, and a Greek name. Two syllables, soft, easy to say aloud, and effectively unclaimed in desktop software.
+
+Rejected on the way: *Beckon* (accurate but reads as a verb, not a companion), *Mira* (collides with an existing desktop automation agent), *Iris* (perfect meaning — the eye — but collides with the Iris screen-dimming desktop app, same category), *Thea* and *Netra* (both mean "sight"; strong runners-up), *Lyra* (Google ships an audio codec by that name).
+
+Repo: `harshvardhan60792/elara`. Package: `elara`. Action namespace: `elara.*`. Plugin marker: `ELARA_PLUGIN`. Tagline unchanged: **"Control your computer with a look, a wave, a word."**
+
+Naming convention throughout: **`elara`** lowercase for anything a machine reads (package, paths, action ids, URLs, filenames), **`Elara`** capitalised in prose and UI.
 
 ---
 

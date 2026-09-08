@@ -3,7 +3,7 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "beckon"
+name = "elara"
 version = "0.1.0"
 description = "Control your computer with a look, a wave, a word. Offline gesture, voice and presence control."
 readme = "README.md"
@@ -33,11 +33,11 @@ voice = [
 ]
 
 [project.scripts]
-beckon = "beckon.__main__:main"
+elara = "elara.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/harshvardhan60792/beckon"
-Issues = "https://github.com/harshvardhan60792/beckon/issues"
+Homepage = "https://github.com/harshvardhan60792/elara"
+Issues = "https://github.com/harshvardhan60792/elara/issues"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
@@ -60,5 +60,5 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 ignore = ["E501"]
 
 [tool.coverage.run]
-source = ["src/beckon"]
+source = ["src/elara"]
 omit = ["*/ui/*"]

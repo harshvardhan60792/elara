@@ -7,7 +7,7 @@ An unattended agent has no camera, no microphone, and no eyes. Everything it cla
 ## Running the suite
 
 ```powershell
-& "D:\study\claude projects\beckon\.venv\Scripts\python.exe" -m pytest -q
+& "D:\study\claude projects\elara\.venv\Scripts\python.exe" -m pytest -q
 ```
 
 `QT_QPA_PLATFORM=offscreen` is set in `tests/conftest.py` before Qt is imported. No display required.
@@ -22,7 +22,7 @@ Every automated test runs with `dry_run=True`. The action executor logs instead 
 `features.py`, `static_gestures.py`, `dynamic_gestures.py`, `smoothing.py`, `arming.py`, `intents.py`, `profiles/manager.py`, `throttle.py`. All take plain data, return plain data, no threads, no Qt, no I/O.
 
 **2. Synthetic pipeline**
-`SynthSource` replays generated landmark sequences through the real engine, arming gate, router, and executor. Asserts the dry-run action log. This is the regression net — `tests/test_e2e_synth.py` must stay green.
+`SynthSource` replays generated landmark sequences through the real engine, arming gate, router, and executor. Asserts the dry-run action log. This is the regression net â€” `tests/test_e2e_synth.py` must stay green.
 
 **3. Qt smoke tests**
 Offscreen construction of every widget, one interaction each, assert no exception and no leaked timers. Coverage here is low by design.
@@ -31,17 +31,17 @@ Offscreen construction of every widget, one interaction each, assert no exceptio
 Introspect the platform adapter: every method in `base.py` exists with a matching signature. Never invoke them.
 
 **5. Performance regression**
-`test_perf_regression.py` asserts per-frame processing time on synth input stays under a generous ceiling. Catches a 10× regression, tolerates CI noise.
+`test_perf_regression.py` asserts per-frame processing time on synth input stays under a generous ceiling. Catches a 10Ã— regression, tolerates CI noise.
 
 ## Fixtures
 
 Regenerate with:
 ```powershell
-& "D:\study\claude projects\beckon\.venv\Scripts\python.exe" scripts\synth_landmarks.py --all --out tests\fixtures\landmarks
+& "D:\study\claude projects\elara\.venv\Scripts\python.exe" scripts\synth_landmarks.py --all --out tests\fixtures\landmarks
 ```
-Deterministic (fixed seed) — `git diff` must be empty after regeneration. If it is not, the generator changed and the classifier tests need re-review.
+Deterministic (fixed seed) â€” `git diff` must be empty after regeneration. If it is not, the generator changed and the classifier tests need re-review.
 
-Fixtures required: the 12 static poses, 4 motion sequences (`swipe_left`, `swipe_right`, `circle_cw`, `push`), 2 two-hand sequences, plus three **negative** fixtures — a slow drift, a hand entering and leaving frame, and a partially occluded hand. The negatives matter more than the positives; false fires are what would make this product unusable.
+Fixtures required: the 12 static poses, 4 motion sequences (`swipe_left`, `swipe_right`, `circle_cw`, `push`), 2 two-hand sequences, plus three **negative** fixtures â€” a slow drift, a hand entering and leaving frame, and a partially occluded hand. The negatives matter more than the positives; false fires are what would make this product unusable.
 
 ## What good coverage looks like here
 
@@ -50,7 +50,7 @@ Not a percentage. Ask instead:
 - Does one physical swipe fire two events? (must not)
 - Does a 90 ms pinch click and a 900 ms pinch drag? (must)
 - Does a disarmed app fire anything? (must not)
-- Does a garbage voice utterance execute the closest match? (must not — it must ask)
+- Does a garbage voice utterance execute the closest match? (must not â€” it must ask)
 
 ---
 
@@ -109,6 +109,6 @@ Requires a person, a webcam, and about 30 minutes. Nothing below can be verified
 
 ### Packaging
 - [ ] Installer runs on a machine that has never had Python
-- [ ] SmartScreen warning appears; "More info → Run anyway" works; README documents it
+- [ ] SmartScreen warning appears; "More info â†’ Run anyway" works; README documents it
 - [ ] Uninstall removes the app and offers to remove settings
 - [ ] Portable zip runs from a USB stick without installation

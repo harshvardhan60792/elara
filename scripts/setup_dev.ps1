@@ -1,5 +1,5 @@
-# Beckon dev environment setup.
-# Everything stays on D: — the C: drive on this machine is nearly full.
+# Elara dev environment setup.
+# Everything stays on D: â€” the C: drive on this machine is nearly full.
 
 $ErrorActionPreference = "Stop"
 
@@ -8,7 +8,7 @@ $venv     = Join-Path $root ".venv"
 $py       = Join-Path $venv "Scripts\python.exe"
 $pipCache = "D:\tmp\pip-cache"
 
-New-Item -ItemType Directory -Force -Path $pipCache, "D:\tmp\beckon", "D:\tmp\build" | Out-Null
+New-Item -ItemType Directory -Force -Path $pipCache, "D:\tmp\elara", "D:\tmp\build" | Out-Null
 
 $free = [math]::Round((Get-PSDrive C).Free / 1GB, 1)
 Write-Host "C: free space: $free GB (installs are redirected to D:)"
@@ -28,4 +28,4 @@ if (-not (Test-Path $py)) {
 Write-Host ""
 Write-Host "Done. Voice extras are optional:"
 Write-Host "  .\.venv\Scripts\python.exe -m pip install -r requirements-voice.txt --cache-dir $pipCache"
-Write-Host "Run:  .\.venv\Scripts\python.exe -m beckon"
+Write-Host "Run:  .\.venv\Scripts\python.exe -m elara"

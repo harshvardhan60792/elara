@@ -10,7 +10,7 @@ htmlcov/
 build/
 dist/
 *.manifest
-!beckon.spec
+!elara.spec
 
 models/
 *.task
