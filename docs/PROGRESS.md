@@ -113,7 +113,7 @@ Legend: `[ ]` todo Â· `[x]` done Â· `[!]` blocked Â· `[~]` partial
 - [ ] T113 SHA256SUMS
 
 ## Phase 12 â€” Release
-- [ ] T120 GitHub repo created and pushed
+- [x] T120 GitHub repo created and pushed â€” https://github.com/harshvardhan60792/elara (public, matches ADR-020's settled naming). CI kicked off automatically on push; check its result before relying on the badge.
 - [ ] T121 README
 - [ ] T122 release workflow on tag
 - [ ] T123 landing page (GitHub Pages)

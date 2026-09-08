@@ -2,11 +2,13 @@
 
 **Control your computer with a look, a wave, a word.**
 
+[![CI](https://github.com/harshvardhan60792/elara/actions/workflows/ci.yml/badge.svg)](https://github.com/harshvardhan60792/elara/actions/workflows/ci.yml)
+
 Elara is a desktop app that turns your webcam into a hands-free controller. Raise a palm and a menu appears under your hand. Swipe to change slides. Pinch and lift to turn the volume up. Say "hey jarvis, open Spotify". Walk away and your music pauses by itself.
 
 Everything runs **on your machine**. No account, no cloud, no subscription, no data leaves your computer. The camera is only on while Elara is armed.
 
-> Status: in development. See [`docs/PROGRESS.md`](docs/PROGRESS.md).
+> Status: gestures, actions, and the core UI (radial menu, toasts, overlay, tray) are built and tested (189 automated tests). Voice, presence, profile auto-switching, and the packaged installer are not yet built. See [`docs/PROGRESS.md`](docs/PROGRESS.md) for the exact state.
 
 <!-- DEMO GIF SLOT: docs/demo.gif -->
 
