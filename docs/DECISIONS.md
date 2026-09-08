@@ -187,3 +187,23 @@ Naming convention throughout: **`elara`** lowercase for anything a machine reads
 **Status:** accepted · 2026-09-09
 
 Maximum adoption for a portfolio project, compatible with every dependency in the stack (MediaPipe Apache-2.0, PySide6 LGPL dynamically linked, Vosk Apache-2.0, openWakeWord Apache-2.0).
+
+---
+
+## ADR-021 — Windows Do Not Disturb (Focus Assist) left unimplemented
+**Status:** accepted · 2026-09-09
+
+`system.dnd_toggle` / `system.dnd_get` raise `NotImplementedError` on the Windows adapter instead of a real implementation. Focus Assist has no supported public Win32 or WinRT API; every known way to read or set it goes through undocumented registry keys (`CurrentUserNotificationState` / `QuietHoursSettings` blobs) that Microsoft has silently changed shape across Windows 10/11 feature updates.
+
+**Why:** shipping a registry hack that quietly breaks on the next Windows update is worse than an honest `NotImplementedError` — the executor already catches and logs any action exception without crashing the app (ADR-014's dry-run gate + the "must never kill the app" rule in T021), so the failure mode for `elara.*` binding this action is a toast saying it didn't work, not a crash. Revisit if Microsoft ever ships a supported API.
+
+---
+
+## ADR-022 — Arming gate (T027) built ahead of its numbered order
+**Status:** accepted · 2026-09-09
+
+`docs/PLAN.md` places the arming gate in Phase 2 (T027), after the vision engine (T017, Phase 1) that depends on it — T017's own acceptance criteria ("driving the engine with 200 frames of a stationary open palm emits at most one event") requires arming behavior to exist. That's a forward dependency the plan itself created.
+
+**Why deviate from "don't build ahead":** `core/arming.py` has zero dependencies on anything Phase 2 (actions, executor, platform adapters) — it's pure logic over `(pose_id, confidence, timestamp, position)` tuples, exactly as T027 specifies. Pulling it forward doesn't pull forward anything else; it just resolves a dependency ordering mistake in the plan's own numbering. T027 is still marked done in `docs/PROGRESS.md` at its original position, with a note pointing back here.
+
+A second design point worth recording: re-arming a fired pose happens only when it is released (drops below the confidence floor or vote threshold) and then reacquired — never merely because the cooldown timer expired while the pose stayed continuously held. Without this, a stationary open-palm hold spanning several cooldown windows would refire repeatedly, which directly contradicts the "at most one event" requirement above. Cooldown then additionally blocks a too-fast release/reacquire cycle on top of that.
