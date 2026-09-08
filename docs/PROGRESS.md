@@ -100,11 +100,11 @@ Legend: `[ ]` todo Â· `[x]` done Â· `[!]` blocked Â· `[~]` partial
 - [ ] T094 perf regression test
 
 ## Phase 10 â€” Tests and CI
-- [ ] T100 unit coverage â‰¥70% on vision/core/actions/intents
-- [ ] T101 e2e synth suite green
-- [ ] T102 ruff clean
-- [ ] T103 CI workflow (windows + ubuntu, headless)
-- [ ] T104 CI badge green on main
+- [~] T100 coverage: vision/core modules are 87-100%; overall repo is 69%, dragged down by platform_adapters/windows.py (36%) and the actions/* modules (24-70%) - by design, since their function BODIES call real pynput/pycaw/win32 APIs that dry-run tests deliberately never invoke (only the executor's dry-run gate around them is tested). Chasing higher % there would mean running real OS actions in an automated agent session, which CLAUDE.md forbids outright.
+- [x] T101 e2e synth suite green â€” 189/189 passing
+- [x] T102 ruff clean
+- [x] T103 CI workflow (windows + ubuntu, headless) â€” added `.github/workflows/ci.yml`; also fixed a real cross-platform bug it would have caught: `test_get_adapter_returns_windows_adapter_on_win32` monkeypatches sys.platform to construct a real `WindowsAdapter()`, which needs pycaw/comtypes (Windows-only deps not installed on the Ubuntu runner) - now skipped on non-Windows. Could not run this workflow for real (no GitHub Actions access from this session) - first push will be the actual test.
+- [ ] T104 CI badge green on main â€” depends on T103 actually running on GitHub; verify after push and add the badge to README once confirmed green
 
 ## Phase 11 â€” Packaging
 - [ ] T110 PyInstaller spec + build script (TEMP on D)

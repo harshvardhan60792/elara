@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import sys
 
 import pytest
 
@@ -17,6 +18,10 @@ _CAPABILITY_METHODS = [
 ]
 
 
+@pytest.mark.skipif(
+    sys.platform != "win32",
+    reason="constructs a real WindowsAdapter, which needs pycaw/comtypes/pynput (Windows-only deps)",
+)
 def test_get_adapter_returns_windows_adapter_on_win32(monkeypatch):
     monkeypatch.setattr("sys.platform", "win32")
     adapter = get_adapter()
