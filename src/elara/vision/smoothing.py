@@ -23,10 +23,7 @@ class _LowPassFilter:
     def __call__(self, value: float, alpha: float | None = None) -> float:
         if alpha is not None:
             self.set_alpha(alpha)
-        if self._y is None:
-            s = value
-        else:
-            s = self._alpha * value + (1.0 - self._alpha) * self._s
+        s = value if self._y is None else self._alpha * value + (1.0 - self._alpha) * self._s
         self._y = value
         self._s = s
         return s

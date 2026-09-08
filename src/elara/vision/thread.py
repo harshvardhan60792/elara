@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Callable
+from collections.abc import Callable
 
 from PySide6.QtCore import QThread
 
@@ -25,16 +25,16 @@ class VisionThread(QThread):
     def stop(self) -> None:
         self._stop_requested = True
 
-    def run(self) -> None:  # noqa: N802 (Qt override)
+    def run(self) -> None:
         engine = self._engine_factory()
         try:
             self._loop(engine)
-        except Exception:  # noqa: BLE001 — the vision thread must never crash the app
+        except Exception:
             logger.exception("vision thread crashed")
         finally:
             try:
                 engine.source.close()
-            except Exception:  # noqa: BLE001
+            except Exception:
                 logger.exception("error closing frame source")
 
     def _loop(self, engine) -> None:
@@ -59,7 +59,7 @@ class VisionThread(QThread):
 
                 battery = psutil.sensors_battery()
                 return bool(battery and not battery.power_plugged)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 return False
 
         return _check

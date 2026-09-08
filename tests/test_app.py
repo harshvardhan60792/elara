@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import signal
 
-from elara.app import AppContext, ElaraApp, build_context
-from elara.config import Config
 from elara.__main__ import install_sigint_handler
+from elara.app import ElaraApp, build_context
+from elara.config import Config
 
 
 def test_toggle_armed_emits_state_changed_twice(qapp):

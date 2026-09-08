@@ -19,8 +19,8 @@ then additionally blocks a too-quick release/re-acquire cycle.
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 
 @dataclass

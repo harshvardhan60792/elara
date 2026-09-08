@@ -15,12 +15,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-import psutil  # noqa: E402
+import psutil
 
-from elara.app import build_context  # noqa: E402
-from elara.config import Config  # noqa: E402
-from elara.vision.camera import SynthSource, VideoFileSource  # noqa: E402
-from elara.vision.engine import VisionEngine  # noqa: E402
+from elara.app import build_context
+from elara.config import Config
+from elara.vision.camera import SynthSource, VideoFileSource
+from elara.vision.engine import VisionEngine
 
 
 def _open_source(spec: str):

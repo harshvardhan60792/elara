@@ -6,7 +6,11 @@ import numpy as np
 import pytest
 
 from elara.paths import models_dir
-from elara.vision.landmarker import DEFAULT_MODEL_NAME, HandLandmarkerWrapper, result_to_landmark_arrays
+from elara.vision.landmarker import (
+    DEFAULT_MODEL_NAME,
+    HandLandmarkerWrapper,
+    result_to_landmark_arrays,
+)
 
 _MODEL_PATH = models_dir() / DEFAULT_MODEL_NAME
 

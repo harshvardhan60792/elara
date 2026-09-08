@@ -38,7 +38,7 @@ def test_screen_bounds_offset_is_respected():
     mapper = CursorMapper(active_rect=(0.0, 0.0, 1.0, 1.0), beta=100.0)
     screen = (1920.0, 0.0, 1920.0, 1080.0)  # a second monitor to the right
 
-    x, y = 0, 0
+    x = 0
     for i in range(5):
-        x, y = mapper.map_to_screen(0.0, 0.0, i * (1 / 30.0), screen)
+        x, _y = mapper.map_to_screen(0.0, 0.0, i * (1 / 30.0), screen)
     assert x >= 1920

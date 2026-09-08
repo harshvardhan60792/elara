@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from elara.paths import models_dir  # noqa: E402
+from elara.paths import models_dir
 
 MODELS = {
     "hand_landmarker.task": {

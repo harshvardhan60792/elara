@@ -40,7 +40,7 @@ def build_full_context(config: Config | None = None, dry_run: bool = True) -> tu
 
     try:
         ctx.platform = get_adapter()
-    except Exception:  # noqa: BLE001 — platform construction touches real OS/COM state
+    except Exception:
         ctx.platform = None
 
     executor = ActionExecutor(registry, ctx)

@@ -11,7 +11,7 @@ no PIP; it uses IP = 3). MCP joints are 2, 5, 9, 13, 17.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 

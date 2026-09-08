@@ -7,7 +7,6 @@ through PIL per frame — that conversion is cheap enough to matter at 30 FPS.
 from __future__ import annotations
 
 import numpy as np
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QImage, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
@@ -50,7 +49,7 @@ class PreviewWidget(QWidget):
         self._cpu_percent = cpu_percent
         self.update()
 
-    def paintEvent(self, event) -> None:  # noqa: N802 (Qt override)
+    def paintEvent(self, event) -> None:
         painter = QPainter(self)
         try:
             if self._frame_bgr is not None:

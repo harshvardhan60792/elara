@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from elara.actions.registry import ActionRegistry
@@ -54,7 +54,7 @@ class ActionExecutor:
         try:
             spec.run(self.ctx, **slots)
             record = ExecutionRecord(action_id, slots, ts, ok=True)
-        except Exception as exc:  # noqa: BLE001 — a failing action must never kill the app
+        except Exception as exc:
             logger.exception("action %s raised", action_id)
             record = ExecutionRecord(action_id, slots, ts, ok=False, error=str(exc))
 

@@ -17,7 +17,6 @@ def ten_frame_video(tmp_path: Path) -> Path:
     writer = cv2.VideoWriter(
         str(path), cv2.VideoWriter_fourcc(*"MJPG"), 30.0, (16, 16)
     )
-    rng = np.random.default_rng(0)
     for i in range(10):
         frame = np.full((16, 16, 3), i * 20, dtype=np.uint8)
         writer.write(frame)

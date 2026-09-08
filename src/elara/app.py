@@ -6,8 +6,9 @@ honest signal of whether Elara is watching."""
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QApplication

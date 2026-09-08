@@ -11,6 +11,7 @@ counter, never wall-clock reads that could go backwards or repeat.
 
 from __future__ import annotations
 
+import contextlib
 import queue
 from pathlib import Path
 
@@ -58,14 +59,10 @@ class HandLandmarkerWrapper:
         try:
             self._results.put_nowait((timestamp_ms, result))
         except queue.Full:
-            try:
+            with contextlib.suppress(queue.Empty):
                 self._results.get_nowait()
-            except queue.Empty:
-                pass
-            try:
+            with contextlib.suppress(queue.Full):
                 self._results.put_nowait((timestamp_ms, result))
-            except queue.Full:
-                pass
 
     def submit(self, frame_bgr: np.ndarray) -> int:
         mp = self._mp

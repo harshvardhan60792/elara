@@ -60,7 +60,7 @@ def _launch(ctx, name: str = "") -> None:
     if path is None:
         ctx.notify(f"No app matching '{name}'")
         return
-    os.startfile(path)  # noqa: S606 — launching a resolved Start Menu shortcut, not arbitrary input
+    os.startfile(path)
     ctx.notify(f"Launching {name}")
 
 

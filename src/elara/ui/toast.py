@@ -5,7 +5,6 @@ rejections in learning mode, and voice transcripts (docs/GESTURES.md)."""
 from __future__ import annotations
 
 from PySide6.QtCore import QPropertyAnimation, QRect, Qt, QTimer
-from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QGraphicsOpacityEffect, QLabel
 
 from elara.ui.overlay import OverlayWindow

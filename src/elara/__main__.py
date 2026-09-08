@@ -57,8 +57,8 @@ def main(argv: list[str] | None = None) -> int:
     tray = None
     toast_manager = None
     if not args.headless:
-        from elara.ui.tray import TrayIcon
         from elara.ui.toast import ToastManager
+        from elara.ui.tray import TrayIcon
 
         tray = TrayIcon(elara_app)
         tray.show()
@@ -66,14 +66,13 @@ def main(argv: list[str] | None = None) -> int:
         toast_manager = ToastManager(duration_ms=ctx.config.ui.toast_duration_ms)
         ctx.on_notify(lambda message: toast_manager.show(message))
 
-    keepalive = install_sigint_handler(qapp)
+    keepalive = install_sigint_handler(qapp)  # noqa: F841 — must outlive exec() or its timer stops firing
 
     if cfg.general.start_armed:
         elara_app.set_armed(True)
 
     exit_code = qapp.exec()
     supervisor.stop()
-    del tray, toast_manager  # keep referenced until after exec() so they aren't GC'd early
     return exit_code
 
 

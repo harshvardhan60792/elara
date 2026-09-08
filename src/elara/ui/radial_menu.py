@@ -12,7 +12,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from PySide6.QtCore import QPropertyAnimation, QRect, Qt, QTimer, Signal
+from PySide6.QtCore import QPropertyAnimation, QRect, QTimer, Signal
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QGraphicsOpacityEffect
 
@@ -119,7 +119,7 @@ class RadialMenu(OverlayWindow):
         self._timeout_timer.stop()
         self.hide()
 
-    def paintEvent(self, event) -> None:  # noqa: N802 (Qt override)
+    def paintEvent(self, event) -> None:
         painter = QPainter(self)
         try:
             self._draw(painter)
@@ -137,7 +137,7 @@ class RadialMenu(OverlayWindow):
         outer = QRect(
             center.x() - self.radius, center.y() - self.radius, self.radius * 2, self.radius * 2
         )
-        for i, seg in enumerate(self.segments):
+        for i in range(n):
             start_angle_deg = 90 - (i * segment_deg) - segment_deg / 2  # Qt angles are CCW from 3 o'clock
             fill = QColor(108, 99, 255, 200 if i == self._hovered_index else 90)
             painter.setBrush(fill)

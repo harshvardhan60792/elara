@@ -11,6 +11,7 @@ CLAUDE.md.
 
 from __future__ import annotations
 
+import contextlib
 import ctypes
 import logging
 
@@ -30,10 +31,8 @@ class WindowsAdapter(PlatformAdapter):
     def __init__(self) -> None:
         import comtypes
 
-        try:
+        with contextlib.suppress(OSError):  # already initialized on this thread — fine
             comtypes.CoInitialize()
-        except OSError:
-            pass  # already initialized on this thread — fine
 
         from pynput.keyboard import Controller as KeyboardController
 
@@ -191,9 +190,8 @@ class WindowsAdapter(PlatformAdapter):
     def window_switch_prev(self) -> None:
         from pynput.keyboard import Key
 
-        with self._keyboard.pressed(Key.alt):
-            with self._keyboard.pressed(Key.shift):
-                self._keyboard.tap(Key.tab)
+        with self._keyboard.pressed(Key.alt), self._keyboard.pressed(Key.shift):
+            self._keyboard.tap(Key.tab)
 
     def show_desktop(self) -> None:
         import win32com.client
