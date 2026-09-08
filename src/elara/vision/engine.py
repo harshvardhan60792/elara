@@ -140,8 +140,16 @@ class VisionEngine:
                 )
             )
 
+        index_tip = landmarks[8]
         self.event_bus.continuous_update.emit(
-            ContinuousUpdate(channel="cursor", value=0.0, position=position)
+            ContinuousUpdate(
+                channel="cursor", value=0.0, position=(float(index_tip[0]), float(index_tip[1]))
+            )
+        )
+
+        pinch_channel_value = 1.0 - min(1.0, feats.pinch_distance / max(self.config.vision.pinch_off, 1e-6))
+        self.event_bus.continuous_update.emit(
+            ContinuousUpdate(channel="pinch_scrub", value=pinch_channel_value, position=position)
         )
 
     def run_to_completion(self, max_steps: int | None = None) -> int:

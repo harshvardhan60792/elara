@@ -47,7 +47,7 @@ Legend: `[ ]` todo Â· `[x]` done Â· `[!]` blocked Â· `[~]` partial
 - [x] T030 overlay base (translucent, click-through, no focus steal)
 - [x] T031 toasts
 - [x] T032 radial menu
-- [~] T033 full tray menu â€” arm/disarm and profile display work; profile submenu doesn't yet call elara.profile_set (needs bootstrap.py wired into tray, next step)
+- [x] T033 full tray menu â€” `python -m elara` now runs the real bootstrap (registry + platform adapter + executor + router + cursor/pinch-scrub controllers), tray shows real arm/disarm, ToastManager wired to ctx.notify so every real action shows a toast. Profile submenu still just a visual checkbox â€” calling elara.profile_set from it is Phase 5 work (ProfileManager)
 - [ ] T034 global hotkeys
 - [ ] T035 settings window (all tabs)
 - [ ] T036 onboarding + calibration wizard
@@ -55,9 +55,9 @@ Legend: `[ ]` todo Â· `[x]` done Â· `[!]` blocked Â· `[~]` partial
 - [ ] T038 theme + generated icons
 
 ## Phase 4 â€” Continuous control
-- [ ] T040 cursor control (active rect, acceleration, click/drag/scroll)
-- [ ] T041 pinch scrub (volume/brightness/zoom)
-- [ ] T042 two-hand gestures (spread, frame capture, panic)
+- [x] T040 cursor control â€” `CursorMapper` (pure, active-rect + One Euro) is Qt-independent and tested without a display; `CursorController` moves the real OS mouse only while `cursor.toggle` is active and armed
+- [x] T041 pinch scrub â€” routes through the normal action executor (`volume.scrub`) rather than calling the platform adapter directly, so it's dry-run safe like everything else; hysteresis (engage at 0.7, release at 0.2) stops threshold noise from chattering
+- [ ] T042 two-hand gestures (spread, frame capture, panic) â€” not started; the vision engine currently only tracks one hand (num_hands passed to HandLandmarker defaults to 2, but engine.py only reads `arrays[0]`, the first detected hand)
 
 ## Phase 5 â€” Profiles
 - [ ] T050 foreground app detection

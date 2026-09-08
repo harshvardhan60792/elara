@@ -63,3 +63,68 @@ class VisionThread(QThread):
                 return False
 
         return _check
+
+
+def make_source(spec: str):
+    """Parses --source camera:N | video:PATH | synth:PATH into a frame
+    source instance. Shared by __main__.py and scripts/bench.py."""
+    from elara.vision.camera import CameraSource, SynthSource, VideoFileSource
+
+    kind, _, value = spec.partition(":")
+    if kind == "camera":
+        return CameraSource(device_index=int(value or 0))
+    if kind == "video":
+        return VideoFileSource(value)
+    if kind == "synth":
+        return SynthSource(value)
+    raise ValueError(f"unsupported --source spec: {spec!r}")
+
+
+class VisionSupervisor:
+    """Starts/stops the VisionThread on StateChanged. A fresh VisionEngine
+    (and, for a real camera, a fresh HandLandmarkerWrapper) is built each
+    time arming happens — nothing about the camera or model is held open
+    while disarmed."""
+
+    def __init__(self, ctx, source_spec: str = "camera:0") -> None:
+        self.ctx = ctx
+        self.source_spec = source_spec
+        self._thread: VisionThread | None = None
+
+    def _build_engine(self):
+        from elara.vision.engine import VisionEngine
+
+        source = make_source(self.source_spec)
+        landmarker = None
+        if self.source_spec.startswith("camera:") or self.source_spec.startswith("video:"):
+            from elara.vision.landmarker import HandLandmarkerWrapper
+
+            try:
+                landmarker = HandLandmarkerWrapper(
+                    min_hand_detection_confidence=self.ctx.config.vision.min_hand_detection_confidence,
+                    min_hand_presence_confidence=self.ctx.config.vision.min_hand_presence_confidence,
+                    min_tracking_confidence=self.ctx.config.vision.min_tracking_confidence,
+                )
+            except FileNotFoundError:
+                logger.warning("hand landmarker model missing; run scripts/fetch_models.py")
+
+        return VisionEngine(source, self.ctx.config, self.ctx.event_bus, landmarker=landmarker)
+
+    def on_state_changed(self, event) -> None:
+        if event.armed:
+            self.start()
+        else:
+            self.stop()
+
+    def start(self) -> None:
+        if self._thread is not None and self._thread.isRunning():
+            return
+        self._thread = VisionThread(self._build_engine)
+        self._thread.start()
+
+    def stop(self) -> None:
+        if self._thread is None:
+            return
+        self._thread.stop()
+        self._thread.wait(2000)
+        self._thread = None

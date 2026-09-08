@@ -15,7 +15,8 @@ from PySide6.QtCore import QTimer
 
 from elara import config as config_module
 from elara import logging_setup
-from elara.app import ElaraApp, build_context, build_qapplication
+from elara.app import ElaraApp, build_qapplication
+from elara.bootstrap import build_full_context
 from elara.cli import parse_args
 
 
@@ -45,20 +46,34 @@ def main(argv: list[str] | None = None) -> int:
         cfg.general.active_profile = args.profile
 
     qapp = build_qapplication(sys.argv[:1])
-    ctx = build_context(cfg, dry_run=args.dry_run)
+    ctx, _router = build_full_context(cfg, dry_run=args.dry_run)
     elara_app = ElaraApp(ctx)
 
+    from elara.vision.thread import VisionSupervisor
+
+    supervisor = VisionSupervisor(ctx, source_spec=args.source or "camera:0")
+    ctx.event_bus.state_changed.connect(supervisor.on_state_changed)
+
     tray = None
+    toast_manager = None
     if not args.headless:
         from elara.ui.tray import TrayIcon
+        from elara.ui.toast import ToastManager
 
         tray = TrayIcon(elara_app)
         tray.show()
 
+        toast_manager = ToastManager(duration_ms=ctx.config.ui.toast_duration_ms)
+        ctx.on_notify(lambda message: toast_manager.show(message))
+
     keepalive = install_sigint_handler(qapp)
 
+    if cfg.general.start_armed:
+        elara_app.set_armed(True)
+
     exit_code = qapp.exec()
-    del tray  # keep referenced until after exec() so it isn't GC'd early
+    supervisor.stop()
+    del tray, toast_manager  # keep referenced until after exec() so they aren't GC'd early
     return exit_code
 
 

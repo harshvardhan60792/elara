@@ -31,6 +31,8 @@ class AppContext:
     platform: PlatformAdapter | None = None
     executor: Any = None
     router: Any = None
+    cursor_controller: Any = None
+    pinch_scrub_controller: Any = None
     set_armed_callback: Callable[[bool], None] | None = None
     _notify_subscribers: list[Callable[[str], None]] = field(default_factory=list)
 

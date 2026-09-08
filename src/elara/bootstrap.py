@@ -12,6 +12,8 @@ from elara.actions.executor import ActionExecutor
 from elara.actions.registry import ActionRegistry
 from elara.app import AppContext, build_context
 from elara.config import Config
+from elara.core.cursor import CursorController
+from elara.core.pinch_scrub import PinchScrubController
 from elara.core.router import Router
 from elara.platform_adapters import get_adapter
 
@@ -46,5 +48,15 @@ def build_full_context(config: Config | None = None, dry_run: bool = True) -> tu
 
     router = Router(registry, executor, ctx, bindings=dict(DEFAULT_BINDINGS))
     router.connect(ctx.event_bus)
+
+    cursor_controller = CursorController(ctx)
+    pinch_scrub_controller = PinchScrubController(ctx)
+    ctx.event_bus.continuous_update.connect(cursor_controller.handle_continuous)
+    ctx.event_bus.continuous_update.connect(pinch_scrub_controller.handle_continuous)
+    # Continuous consumers bypass the arming gate entirely (ADR per
+    # ARCHITECTURE.md) and aren't reachable through ctx alone otherwise —
+    # anchor them the same way Router anchors itself, or they'd be GC'd.
+    ctx.cursor_controller = cursor_controller
+    ctx.pinch_scrub_controller = pinch_scrub_controller
 
     return ctx, router
