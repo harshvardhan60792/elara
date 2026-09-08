@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beckon"
+version = "0.1.0"
+description = "Control your computer with a look, a wave, a word. Offline gesture, voice and presence control."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "Harshvardhan" }]
+keywords = ["gesture-control", "computer-vision", "mediapipe", "voice-assistant", "accessibility", "offline"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video :: Capture",
+    "Topic :: Adaptive Technologies",
+]
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+voice = [
+    "openwakeword>=0.6",
+    "onnxruntime>=1.18",
+    "vosk>=0.3.45",
+    "sounddevice>=0.4.7",
+    "pyttsx3>=2.90",
+]
+
+[project.scripts]
+beckon = "beckon.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/harshvardhan60792/beckon"
+Issues = "https://github.com/harshvardhan60792/beckon/issues"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.coverage.run]
+source = ["src/beckon"]
+omit = ["*/ui/*"]
