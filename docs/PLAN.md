@@ -6,6 +6,8 @@ Task IDs are stable. Never renumber. If you add work, append a new id at the end
 
 Every task below states **Files**, **Do**, and **Accept**. "Accept" is a check you can actually run without a camera, a microphone, or a human — unless it explicitly says `HUMAN`, in which case it goes to the checklist in `docs/TESTING.md` and is *not* claimed as passing.
 
+**If time runs short**, the triage order is in `docs/OVERNIGHT_GOAL.md`: Phases 0–2 make it work, Phase 3 makes it look like a product, Phase 4 makes it feel like one, Phases 11–12 make it public. Voice, presence and the extras are enrichment — a polished half beats a broken whole. Never end a session with a failing `pytest -q` or an app that will not start.
+
 ---
 
 # Phase 0 — Bootstrap

@@ -75,6 +75,7 @@ Design notes and the reasoning behind every choice are in [`docs/ARCHITECTURE.md
 | [DECISIONS.md](docs/DECISIONS.md) | Every design decision and why |
 | [GESTURES.md](docs/GESTURES.md) | Gesture vocabulary and action catalogue |
 | [TESTING.md](docs/TESTING.md) | Test strategy and the human QA checklist |
+| [OVERNIGHT_GOAL.md](docs/OVERNIGHT_GOAL.md) | The build prompt and triage order |
 | [RESEARCH.md](docs/RESEARCH.md) | Library evaluation and prior art |
 
 ## Licence
