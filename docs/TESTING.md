@@ -59,6 +59,7 @@ Not a percentage. Ask instead:
 Requires a person, a webcam, and about 30 minutes. Nothing below can be verified by an agent. Tick these only after actually doing them.
 
 ### Setup
+- [ ] Ctrl+C in a real console window closes `python -m elara --headless` cleanly (automated coverage only exercises the handler logic via `signal.raise_signal` in-process — this agent's sandbox has no console attached, so `GenerateConsoleCtrlEvent` cannot be exercised for real; see `tests/test_app.py::test_sigint_handler_quits_qapp`)
 - [ ] Fresh install on a clean Windows user profile completes without an admin prompt
 - [ ] First launch opens onboarding; camera preview shows a live image
 - [ ] Calibration step measures hand span and the resulting thresholds feel right
