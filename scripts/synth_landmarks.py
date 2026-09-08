@@ -20,6 +20,17 @@ FINGER_X = {"index": -0.12, "middle": 0.0, "ring": 0.12, "pinky": 0.24}
 THUMB_X = -0.35
 SEED = 1234
 
+# Trig (sin/cos) differs at the ULP level between platforms/numpy builds -
+# Windows and Linux produce bit-different ninth-decimal results from the
+# exact same seed. That's far below any threshold these fixtures are ever
+# compared against, so round it away rather than let it break the
+# "regeneration is a no-op diff" check in CI across OSes.
+ROUND_DIGITS = 9
+
+
+def _tolist(arr: np.ndarray) -> list:
+    return np.round(arr, ROUND_DIGITS).tolist()
+
 
 def _straight_finger(x_off: float) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     mcp = np.array([x_off, 0.5, 0.0])
@@ -148,7 +159,7 @@ def build_swipe(direction: str, duration_s: float = 0.35, fps: float = 60.0, dis
     for i in range(n_frames + 1):
         t = i / n_frames
         offset = deltas * _smoothstep(t)
-        frames.append({"t": round(t * duration_s, 6), "landmarks": (base + offset).tolist()})
+        frames.append({"t": round(t * duration_s, 6), "landmarks": _tolist(base + offset)})
     return frames
 
 
@@ -161,7 +172,7 @@ def build_circle(direction: str, radius: float = 0.5, duration_s: float = 0.8, f
         t = i / n_frames
         angle = sign * _smoothstep(t) * 2 * np.pi
         offset = np.array([radius * np.cos(angle) - radius, radius * np.sin(angle), 0.0])
-        frames.append({"t": round(t * duration_s, 6), "landmarks": (base + offset).tolist()})
+        frames.append({"t": round(t * duration_s, 6), "landmarks": _tolist(base + offset)})
     return frames
 
 
@@ -172,7 +183,7 @@ def build_held_pose(name: str, duration_s: float = 1.0, fps: float = 30.0) -> li
     of "hold open_palm -> action fires" actually needs to drive."""
     base = build_pose(name)
     n_frames = max(1, int(duration_s * fps))
-    return [{"t": round(i / fps, 6), "landmarks": base.tolist()} for i in range(n_frames)]
+    return [{"t": round(i / fps, 6), "landmarks": _tolist(base)} for i in range(n_frames)]
 
 
 def build_push(duration_s: float = 0.3, fps: float = 60.0, growth: float = 1.8) -> list[dict]:
@@ -189,7 +200,7 @@ def build_push(duration_s: float = 0.3, fps: float = 60.0, growth: float = 1.8) 
         t = i / n_frames
         scale = 1.0 + (growth - 1.0) * _smoothstep(t)
         scaled = palm_center0 + scale * (base - palm_center0)
-        frames.append({"t": round(t * duration_s, 6), "landmarks": scaled.tolist()})
+        frames.append({"t": round(t * duration_s, 6), "landmarks": _tolist(scaled)})
     return frames
 
 
@@ -203,7 +214,7 @@ def build_slow_drift(duration_s: float = 2.0, fps: float = 30.0, distance: float
     for i in range(n_frames + 1):
         t = i / n_frames
         offset = np.array([distance * t, 0.0, 0.0])
-        frames.append({"t": round(t * duration_s, 6), "landmarks": (base + offset).tolist()})
+        frames.append({"t": round(t * duration_s, 6), "landmarks": _tolist(base + offset)})
     return frames
 
 
@@ -219,7 +230,7 @@ def build_hand_enter_exit(fps: float = 30.0) -> list[dict]:
         frames.append({"t": round(t, 6), "landmarks": None})
         t += dt
     for _ in range(15):
-        frames.append({"t": round(t, 6), "landmarks": base.tolist()})
+        frames.append({"t": round(t, 6), "landmarks": _tolist(base)})
         t += dt
     for _ in range(5):
         frames.append({"t": round(t, 6), "landmarks": None})
@@ -239,7 +250,7 @@ def build_partial_occlusion(fps: float = 30.0, sigma: float = 0.15, rng: np.rand
     for i in range(20):
         pts = base.copy()
         pts[tip_indices] += rng.normal(0, sigma, size=(5, 3))
-        frames.append({"t": round(i * dt, 6), "landmarks": pts.tolist()})
+        frames.append({"t": round(i * dt, 6), "landmarks": _tolist(pts)})
     return frames
 
 
@@ -257,7 +268,7 @@ def main() -> None:
     for name in _POSES:
         pts = build_pose(name)
         pts = add_noise(pts, args.noise, rng)
-        (out_dir / f"{name}.json").write_text(json.dumps(pts.tolist(), indent=2))
+        (out_dir / f"{name}.json").write_text(json.dumps(_tolist(pts), indent=2))
 
     (out_dir / "held_open_palm.json").write_text(json.dumps(build_held_pose("open_palm"), indent=2))
     (out_dir / "held_fist.json").write_text(json.dumps(build_held_pose("fist"), indent=2))
