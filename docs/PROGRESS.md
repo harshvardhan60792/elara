@@ -4,7 +4,7 @@
 
 Legend: `[ ]` todo Â· `[x]` done Â· `[!]` blocked Â· `[~]` partial
 
-**Status:** Phases 0-2 complete and tested. Phase 3 partial (overlay, toasts, radial menu built; tray wired to real arm/disarm, profile switching still basic). 154/154 tests passing.
+**Status:** Phases 0-4, 10, 11 complete and verified. Phase 12 mostly done (repo public + pushed, CI green, landing page live, packaging built/installed/uninstalled for real). Phases 5-9 (profiles beyond a hardcoded binding set, voice, presence, extras, measured performance) not started or not startable by an agent. 189/189 tests passing. See the session summary at the bottom of this file.
 **Last updated:** 2026-09-09 overnight autonomous session.
 
 ---
@@ -116,7 +116,7 @@ Legend: `[ ]` todo Â· `[x]` done Â· `[!]` blocked Â· `[~]` partial
 - [x] T120 GitHub repo created and pushed â€” https://github.com/harshvardhan60792/elara (public, matches ADR-020's settled naming). CI kicked off automatically on push; check its result before relying on the badge.
 - [x] T121 README â€” status line, CI badge, and doc table kept current with actual progress throughout the session
 - [~] T122 release workflow on tag â€” `.github/workflows/release.yml` added (builds PyInstaller bundle + Inno installer + portable zip + SHA256SUMS, creates a GitHub Release on a `v*` tag push). Relies on windows-latest shipping Inno Setup 6 preinstalled at the documented path - **not actually verified**, since triggering it means pushing a real tag and publishing a public Release, which is the user's call, not mine to make unattended. Push a `v0.1.0` tag to test it.
-- [ ] T123 landing page (GitHub Pages)
+- [x] T123 landing page (GitHub Pages) â€” https://harshvardhan60792.github.io/elara/ live and verified in-browser
 - [ ] T124 demo GIFs â€” HUMAN, needs a webcam
 - [ ] T125 final QA pass â€” HUMAN
 
@@ -126,17 +126,43 @@ Legend: `[ ]` todo Â· `[x]` done Â· `[!]` blocked Â· `[~]` partial
 
 | Metric | Target | Measured | Date |
 |---|---|---|---|
-| Idle CPU (armed, no hand) | < 3% | â€” | â€” |
-| Active CPU (30 FPS tracking) | < 12% | â€” | â€” |
-| RAM active | < 400 MB | â€” | â€” |
-| Gesture â†’ action latency | < 120 ms | â€” | â€” |
-| Cold start to tray | < 3 s | â€” | â€” |
-| Installer size | < 150 MB | â€” | â€” |
+| Idle CPU (armed, no hand) | < 3% | â€” (needs a real camera; not measurable by an agent) | â€” |
+| Active CPU (30 FPS tracking) | < 12% | â€” (needs a real camera) | â€” |
+| RAM active | < 400 MB | â€” (needs a real camera) | â€” |
+| Gesture â†’ action latency | < 120 ms | â€” (needs a real camera) | â€” |
+| Cold start to tray | < 3 s | â€” (observed subjectively fast in headless smoke tests, not rigorously timed) | â€” |
+| Installer size | < 150 MB | **123.7 MB** (setup exe) / 182.8 MB (portable zip, uncompressed contents) | 2026-09-09 |
+
+`scripts/bench.py` exists and runs against synth/video sources, but the performance budget table above is specifically about a *real* camera + real inference load, which this agent session cannot produce. Phase 9 (T090-T094) is genuinely un-startable without a human at a webcam; do not mark it done from a synth-source bench run.
 
 ## Notes and surprises
 
-_Append findings here as work proceeds â€” anything a future session would waste time rediscovering._
+- The single biggest time cost this session was network speed for the initial `pip install` (~430 kB/s peak; mediapipe + PySide6 + opencv alone total several hundred MB), not anything about the actual coding work.
+- Two separate near-misses came from **not keeping a reference alive**: (1) a `Router` built in a test helper and never returned got garbage-collected despite its Qt signal connection looking intact, silently killing event delivery with no error anywhere (fixed by having `Router.__init__` anchor itself on `ctx.router`); (2) worth remembering for any *future* PySide6 code in this repo â€” a QObject connected via a plain bound method needs something to hold a real Python reference to the owning object, always.
+- A second real gotcha: EventBus signal `emit()` can silently no-op when no QApplication instance exists anywhere in the process yet, even though the call itself raises nothing. Every test that emits through `ctx.event_bus` now takes the `qapp` fixture explicitly, not just tests that touch a widget.
+- Floating-point trig is not cross-platform-deterministic at the ULP level: the exact same numpy seed produces different 9th-decimal-place values for `sin`/`cos` on Windows vs. Linux. This broke the "regenerate fixtures, diff must be empty" CI check on ubuntu-latest; fixed by rounding fixture coordinates to 9 decimals, which is far more precision than any threshold in this codebase ever compares at.
+- A long-running background build (the Inno Setup compile) landed on a context-compaction boundary mid-session and produced a corrupted output file that *looked* complete (plausible size, no error) but failed at runtime with "setup files are corrupted." Re-ran it as a detached process polled to exit rather than trusting a single tool call to survive the boundary â€” see ADR-023. Worth remembering for any future multi-minute build in this repo.
+- The static gesture classifier had three real bugs that only a fixture-driven test caught (see T014 notes): `point` didn't exclude a pinching thumb, a "folded" thumb that was short-but-straight still read as anatomically extended (the angle test only cares about direction, not segment length), and one thumb angle constant was mistuned by ~8 degrees, just under a threshold. None of these would have been caught by unit tests against hand-picked feature dicts â€” only by round-tripping through the actual synthetic landmark generator.
+- `max_stroke_s` (meant to cap swipe completion time) was originally applied before branching into swipe-vs-circle classification, so it also silently rejected every circle gesture, which legitimately takes longer than a quick swipe. Another bug only the fixture-driven dynamic-gesture test caught.
 
 ## Post-v1 backlog
 
-_File anything discovered but out of scope here rather than expanding a task._
+- T042 two-hand gestures (spread, frame capture, panic) â€” the vision engine currently only processes the first detected hand (`arrays[0]`); extending to both hands needs a per-hand-label dispatch in `engine.py` and a new two-hand gesture detector.
+- T034 global hotkeys, T035 settings window, T036 onboarding/calibration wizard, T037 stats, T038 theme â€” Phase 3 enrichment, not started.
+- Phase 5 (profiles): only a hardcoded `DEFAULT_BINDINGS` dict in `bootstrap.py` exists. No `ProfileManager`, no foreground-app-based auto-switching, no persisted per-profile bindings, no profile editor UI. `elara.profile_next`/`elara.profile_set` mutate `config.general.active_profile` and emit `ProfileChanged`, but nothing actually swaps `Router.bindings` in response yet â€” that's the real gap.
+- Phase 6 (voice) â€” not started at all. `requirements-voice.txt` lists the deps (openWakeWord, Vosk, sounddevice, pyttsx3) but no `voice/` module code exists beyond the empty package `__init__.py`.
+- Phase 7 (presence) â€” not started. No face detector, no away/back state machine.
+- Phase 8 (extras) â€” air draw, laser pointer, macro recorder, custom gesture trainer, plugin loader, update check, adaptive throttling: none started.
+- The radial menu (`ui/radial_menu.py`) never actually draws segment labels/icons â€” `_draw()` renders the wedges and the dead-zone ring but doesn't call anything with `seg.label`. Cosmetic gap, not a functional one (hover/selection logic is fully correct and tested).
+- `meeting.py`'s per-app hotkey table only covers Zoom/Teams/Chrome(Meet) â€” no Slack huddles, no Discord.
+- No integration test exercises `VisionSupervisor` against a *real* camera source (`camera:0`) â€” only against `SynthSource`. That path is genuinely untestable by an agent and needs the Setup section of the Human QA checklist.
+
+## Summary for whoever picks this up next (2026-09-09, end of overnight session)
+
+**What got built:** Phases 0-4 complete and tested (bootstrap, vision pipeline, actions, arming/router, overlay/toasts/radial-menu, cursor control, pinch-scrub). Phase 10 (tests, ruff, CI) complete â€” 189 automated tests, all green, on both Windows and Ubuntu in GitHub Actions. Phase 11 (packaging) complete and *actually verified end to end*: built the PyInstaller bundle, ran it; built the Inno Setup installer, silently installed it, ran the installed exe, silently uninstalled it, confirmed cleanup. Phase 12 (release) mostly done: the repo is public and pushed (https://github.com/harshvardhan60792/elara), the landing page is live (https://harshvardhan60792.github.io/elara/), a release workflow exists (untriggered â€” pushing a version tag and publishing a public GitHub Release is left as the user's call). `python -m elara` runs the real bootstrap end to end, not a stub.
+
+**What's left:** Voice (Phase 6) and presence (Phase 7) are unstarted â€” genuinely large pieces of the original vision, not small gaps. Profiles (Phase 5) only has a hardcoded binding set, no real auto-switching. Two-hand gestures, global hotkeys, the settings window, onboarding wizard, and a few extras (Phase 3/4/8 leftovers) are unstarted. The performance budget (Phase 9) cannot be measured by an agent at all â€” it needs a human with a real webcam.
+
+**What surprised me:** How much real, load-bearing testing came from round-tripping through the *actual* synthetic fixture generator rather than hand-picked unit test inputs â€” three separate classifier bugs and one dynamic-gesture bug only surfaced that way. Also how much of packaging is genuinely unverifiable without actually running the artifact (a corrupted Inno Setup build looked completely fine on disk until launched).
+
+**Exact next step:** Either (a) pick up Phase 5 properly â€” build `profiles/manager.py` with foreground-app polling and wire it to swap `Router.bindings`, which is the natural next increment on top of what exists, or (b) if the user wants a public v0.1.0 release now, push a `v0.1.0` tag and watch `.github/workflows/release.yml` run for the first time (unverified â€” it may need a fix or two). Read `docs/PROGRESS.md` top-to-bottom and `docs/DECISIONS.md` ADR-020 through ADR-023 first; both are current as of this line.
