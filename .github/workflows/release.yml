@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install -e . --no-deps
+
+      - name: pytest
+        run: pytest -q
+
+      - name: Build PyInstaller bundle
+        run: |
+          $env:TEMP = "D:\a\_temp"
+          $env:TMP = "D:\a\_temp"
+          python -m PyInstaller elara.spec --noconfirm --clean --distpath dist --workpath build_work
+
+      - name: Portable zip + SHA256SUMS
+        shell: pwsh
+        run: .\scripts\package_release.ps1
+
+      # windows-latest ships Inno Setup 6 preinstalled at this path.
+      - name: Build installer
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\elara.iss'
+
+      - name: Append installer hash to SHA256SUMS
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem dist\elara-*-setup-win64.exe | Select-Object -First 1
+          $hash = Get-FileHash $exe.FullName -Algorithm SHA256
+          "$($hash.Hash.ToLower())  $($exe.Name)" | Out-File -FilePath dist\SHA256SUMS.txt -Encoding utf8 -Append
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/elara-*-portable-win64.zip
+            dist/elara-*-setup-win64.exe
+            dist/SHA256SUMS.txt
+          generate_release_notes: true
+          body: |
+            Unsigned build - Windows will show "Windows protected your PC". Click **More info -> Run anyway**.
+            Verify your download against `SHA256SUMS.txt` if you'd rather check than trust.

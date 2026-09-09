@@ -114,8 +114,8 @@ Legend: `[ ]` todo Â· `[x]` done Â· `[!]` blocked Â· `[~]` partial
 
 ## Phase 12 â€” Release
 - [x] T120 GitHub repo created and pushed â€” https://github.com/harshvardhan60792/elara (public, matches ADR-020's settled naming). CI kicked off automatically on push; check its result before relying on the badge.
-- [ ] T121 README
-- [ ] T122 release workflow on tag
+- [x] T121 README â€” status line, CI badge, and doc table kept current with actual progress throughout the session
+- [~] T122 release workflow on tag â€” `.github/workflows/release.yml` added (builds PyInstaller bundle + Inno installer + portable zip + SHA256SUMS, creates a GitHub Release on a `v*` tag push). Relies on windows-latest shipping Inno Setup 6 preinstalled at the documented path - **not actually verified**, since triggering it means pushing a real tag and publishing a public Release, which is the user's call, not mine to make unattended. Push a `v0.1.0` tag to test it.
 - [ ] T123 landing page (GitHub Pages)
 - [ ] T124 demo GIFs â€” HUMAN, needs a webcam
 - [ ] T125 final QA pass â€” HUMAN
