@@ -103,14 +103,14 @@ Legend: `[ ]` todo Â· `[x]` done Â· `[!]` blocked Â· `[~]` partial
 - [~] T100 coverage: vision/core modules are 87-100%; overall repo is 69%, dragged down by platform_adapters/windows.py (36%) and the actions/* modules (24-70%) - by design, since their function BODIES call real pynput/pycaw/win32 APIs that dry-run tests deliberately never invoke (only the executor's dry-run gate around them is tested). Chasing higher % there would mean running real OS actions in an automated agent session, which CLAUDE.md forbids outright.
 - [x] T101 e2e synth suite green â€” 189/189 passing
 - [x] T102 ruff clean
-- [x] T103 CI workflow (windows + ubuntu, headless) â€” added `.github/workflows/ci.yml`; also fixed a real cross-platform bug it would have caught: `test_get_adapter_returns_windows_adapter_on_win32` monkeypatches sys.platform to construct a real `WindowsAdapter()`, which needs pycaw/comtypes (Windows-only deps not installed on the Ubuntu runner) - now skipped on non-Windows. Could not run this workflow for real (no GitHub Actions access from this session) - first push will be the actual test.
-- [ ] T104 CI badge green on main â€” depends on T103 actually running on GitHub; verify after push and add the badge to README once confirmed green
+- [x] T103 CI workflow (windows + ubuntu, headless) â€” added `.github/workflows/ci.yml`. First real run caught a genuine bug: the fixture-regeneration-diff check failed on ubuntu-latest because numpy's sin/cos differ from Windows at the 9th decimal place on the exact same seed (a real cross-platform float reproducibility gap) - fixed by rounding fixture coordinates to 9 decimals before writing.
+- [x] T104 CI badge green on main â€” https://github.com/harshvardhan60792/elara/actions confirmed green after the rounding fix; badge is live in README
 
 ## Phase 11 â€” Packaging
-- [ ] T110 PyInstaller spec + build script (TEMP on D)
-- [ ] T111 Inno Setup installer (per-user, no admin)
-- [ ] T112 portable zip
-- [ ] T113 SHA256SUMS
+- [x] T110 PyInstaller spec + build script (TEMP on D) â€” built and ran dist\elara\elara.exe headless, clean exit, no errors
+- [x] T111 Inno Setup installer (per-user, no admin) â€” installer\elara.iss, PrivilegesRequired=lowest. Installed Inno Setup via winget since it wasn't present. First compile attempt produced a corrupted exe (the compile finished during a session context-compaction boundary and was apparently interrupted mid-write - "The setup files are corrupted" on launch); recompiled as a detached process polled to completion instead of relying on a single tool call surviving the boundary. Second build verified for real: silent install (exit 0) -> installed exe runs headless cleanly -> silent uninstall removes the directory completely. Uninstall also prompts (MsgBox, skipped when no settings exist yet) before deleting `%LOCALAPPDATA%\Elara` settings/models.
+- [x] T112 portable zip â€” scripts\package_release.ps1, dist\elara-0.1.0-portable-win64.zip (192MB)
+- [x] T113 SHA256SUMS â€” dist\SHA256SUMS.txt, appended to by package_release.ps1
 
 ## Phase 12 â€” Release
 - [x] T120 GitHub repo created and pushed â€” https://github.com/harshvardhan60792/elara (public, matches ADR-020's settled naming). CI kicked off automatically on push; check its result before relying on the badge.

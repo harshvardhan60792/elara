@@ -207,3 +207,14 @@ Maximum adoption for a portfolio project, compatible with every dependency in th
 **Why deviate from "don't build ahead":** `core/arming.py` has zero dependencies on anything Phase 2 (actions, executor, platform adapters) — it's pure logic over `(pose_id, confidence, timestamp, position)` tuples, exactly as T027 specifies. Pulling it forward doesn't pull forward anything else; it just resolves a dependency ordering mistake in the plan's own numbering. T027 is still marked done in `docs/PROGRESS.md` at its original position, with a note pointing back here.
 
 A second design point worth recording: re-arming a fired pose happens only when it is released (drops below the confidence floor or vote threshold) and then reacquired — never merely because the cooldown timer expired while the pose stayed continuously held. Without this, a stationary open-palm hold spanning several cooldown windows would refire repeatedly, which directly contradicts the "at most one event" requirement above. Cooldown then additionally blocks a too-fast release/reacquire cycle on top of that.
+
+---
+
+## ADR-023 — Verify long-running builds by polling a detached process, not a single blocking tool call
+**Status:** accepted · 2026-09-09
+
+The first Inno Setup compile (T111) produced a corrupted installer: launching it showed "The setup files are corrupted. Please obtain a new copy of the program." The compile had been kicked off as a single tool call expected to run to completion; it landed during this session's context-compaction boundary, and everything on disk afterward looked plausible (an exe existed at a reasonable size) despite being silently truncated or otherwise incomplete.
+
+**Fix:** re-ran the compile as a fully detached process (`Start-Process` with redirected output, no `-Wait`, returning its PID immediately) and polled `tasklist` for that PID to exit before touching the output file — the compile's lifetime is no longer tied to any single tool call surviving in this session. Verified the rebuilt installer for real this time: silent install (exit 0) → run the installed exe → silent uninstall → confirm the install directory is fully gone.
+
+**Why this matters beyond this one build:** a file existing with a plausible size is not proof a long-running write finished cleanly. Any future multi-minute build/compile/download in this repo should be launched detached and polled to process-exit, not assumed to complete inside one tool call — especially spec.py/PyInstaller/Inno Setup runs, which are exactly the kind of long, silent, large-output operations most likely to straddle a compaction boundary undetected.
